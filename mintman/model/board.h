@@ -20,9 +20,24 @@ public:
         return false;
     }
 
-    bool move(const Brick& brick, const transition& transition)
+    bool move(const Brick* brick, const transition& transition)
     {
-        return _translateBrick(brick.getId(), transition, brick.getBricktype());
+        return _translateBrick(brick->getId(), transition, brick->getBricktype());
+    }
+
+    bool move(int id, const transition& transition)
+    {
+        Brick* brick = _findBrick(id);
+        return move(brick, transition);
+    }
+
+    void draw(bool console)
+    {
+        _clear();
+        debug(); 
+        std::string command;
+        std::cin >> command;
+        _handleConsoleInput(command);
     }
 
 private:
@@ -31,12 +46,25 @@ private:
     std::vector<int> _cells;
     std::vector<Brick> _bricks;
     bool _canPlace(int x, int y, const bricktype& bricktype, int key);
-    bool _translateBrick(int id, const transition& transition, const bricktype& bricktype);
+    bool _translateBrick(int id, transition transition, const bricktype& bricktype);
+    Brick* _findBrick(int id);
     void _addBrick(int x, int y, const Brick& brick);
     void _setValue(int x, int y, const bricktype& bricktype, int value);
     bool _matchesAnyOf(int value, int a, int b)
     {
         return value == a || value == b;
+    }
+    void _handleConsoleInput(std::string ch);
+    void _clear() 
+    {
+        #if defined( _WIN32)  ||  defined(_WIN64)
+            system("cls");
+        #else
+            system("clear");
+        #endif
+
+        //printf("\033[2J");
+        //printf("\033[%d;%dH", 0, 0);
     }
 
 };

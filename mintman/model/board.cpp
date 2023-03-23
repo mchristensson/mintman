@@ -2,11 +2,54 @@
 
 #include <iostream>
 #include <string>
+#include <stdexcept> // innehåller undantagsklasser
+
 
 Board::Board(int width, int height) :
     _width(width), _height(height), _cells(_width * _height, 0), _bricks(20, Brick())
 {
 };
+
+void Board::_handleConsoleInput(std::string ch)
+{
+    if (ch.length() >= 0)
+    {
+        int idx = ch.find(":");
+        std::string id = ch.substr(0, idx);
+        if ( idx + 1 != std::string::npos )
+        {
+            std::string cmd = ch.substr(idx + 1, std::string::npos);
+            transition transition;
+            if (cmd == "z")
+                transition = down;
+            else if (cmd == "a")
+                transition = left;
+            else if (cmd == "s")
+                transition = right;
+            else if (cmd == "w")
+                transition = up;
+            else {
+                std::cerr << "Ogilitig riktning";
+                return;
+            }
+            //std::cout << "\nYou pressed " << ch << "  with command " << cmd << " transition: " << transition  << " \n";
+            try {
+                Brick* brick = _findBrick(std::stoi(id));
+                _translateBrick(brick->getId(), transition, brick->getBricktype());
+            } catch (const std::invalid_argument& e) {
+                printf("\nOgilitig bricka!\n");
+            } catch (const std::out_of_range& e) {
+                printf("\nOgilitigt bricka!\n");
+            }
+        }
+        else {
+            printf("\nOgilitigt kommando!\n");
+        }
+    }
+    else
+       printf("\nAliens have taken over standard input! Run!\n");
+
+}
 
 bool Board::_canPlace(int x, int y, const bricktype& bricktype, int key) {
     int dy = 0;
@@ -87,7 +130,19 @@ void Board::_setValue(int x, int y, const bricktype& bricktype, int value)
     }
 }
 
-bool Board::_translateBrick(int id, const transition& transition, const bricktype& bricktype)
+Brick* Board::_findBrick(int id)
+{
+    for(int i=0; i < _bricks.size(); i++)
+    {
+        if(_bricks[i].getId()==id)
+        {
+            return &_bricks[i];
+        }
+    }
+    return nullptr;
+} 
+
+bool Board::_translateBrick(int id, transition transition, const bricktype& bricktype)
 {
     //Find current location
     int x = -1;
@@ -157,7 +212,7 @@ void Board::debug()
         }
         std::cout << _cells[k];
         if (k < _cells.size() -1) {
-            std::cout <<  ", "; 
+            std::cout <<  " "; 
         }
     }
     std::cout << "\n";
