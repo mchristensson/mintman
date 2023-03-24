@@ -2,12 +2,10 @@
 
 Brick::Brick(bricktype bricktype, int id) : _bricktype(bricktype), _id(id)
 {
-
 }
 
 Brick::Brick()
 {
-
 }
 
 bricktype Brick::getBricktype() const

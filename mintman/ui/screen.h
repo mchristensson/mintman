@@ -54,11 +54,9 @@ public:
             r.y = marginVertical + (heigthBrick * c.y) + padding;
             r.h = (heigthBrick * c.height) - (2 * padding);
             r.w = (widthBrick * c.width) - (2 * padding);
-
             SDL_SetRenderDrawColor(_renderer, c.r, c.g, c.b, 255);
             SDL_RenderFillRect(_renderer, &r);
         }
-        
     }
 
 
@@ -87,9 +85,6 @@ private:
         }
         return true;
     }
-
-    
-    
 
 private:
     std::string _title;

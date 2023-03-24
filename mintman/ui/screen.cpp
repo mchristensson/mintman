@@ -19,22 +19,20 @@ void Screen::handleEvent(Board &board)
                 switch ( event.key.keysym.sym )
                 {
                 case SDLK_DOWN:
-                    board.move(4, down);
+                    board.move(5, down);
                     break;
                 case SDLK_UP:
-                    board.move(4, up);
+                    board.move(5, up);
                     break;
                 case SDLK_LEFT:
-                    board.move(4, left);
+                    board.move(5, left);
                     break;
                 case SDLK_RIGHT:
-                    board.move(4, right);
+                    board.move(5, right);
                     break;
                 default:
                     break;
                 }
-            
-
             case SDL_MOUSEBUTTONDOWN: 
                 int mouse_x, mouse_y;
                 SDL_GetMouseState(&mouse_x, &mouse_y); 
@@ -46,10 +44,8 @@ void Screen::handleEvent(Board &board)
 }
 
 void Screen::draw(Board &board) {
-    
     drawImpl(board);
     SDL_SetRenderDrawColor(_renderer, 190, 90, 150, 255);
     SDL_RenderPresent(_renderer);
     SDL_RenderClear(_renderer);
-    //You should try to call SDL_RenderClear() after each call to SDL_RenderPresent().
 }

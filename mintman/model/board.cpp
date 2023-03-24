@@ -1,5 +1,4 @@
 #include "board.h"
-
 #include <iostream>
 #include <string>
 #include <stdexcept> // innehåller undantagsklasser
@@ -63,12 +62,18 @@ bool Board::_canPlace(int x, int y, const bricktype& bricktype, int key) {
     switch (bricktype)
     {
     case staende:
-        brick_height = 1;
-        break;
-    case liggande:
+        brick_height = 2;
         brick_width = 1;
         break;
+    case liggande:
+        brick_height = 1;
+        brick_width = 2;
+        break;
     case mintman:
+        brick_width = 2;
+        brick_height = 2;
+        break;
+    case liten:
         brick_width = 1;
         brick_height = 1;
         break;
@@ -77,18 +82,19 @@ bool Board::_canPlace(int x, int y, const bricktype& bricktype, int key) {
     }
 
     //Out of bounds-check
-    if ( (x < 0 && (x+brick_width) >= _width) || (y < 0 && (y+brick_height) >= _height) )
+    if ( (x < 0 || (x+brick_width) > _width) || (y < 0 || (y+brick_height) > _height) )
     {
         return false;
     }
 
-    //Index is not used
+    //TODO: Need to clean this mess up!!!
     switch (bricktype)
     {
     case staende:
         return 
         _matchesAnyOf(_cells[y * _width + x], 0, key) && 
-        _matchesAnyOf(_cells[(y + brick_height) * _width + x], 0, key);
+        (((y + brick_height) * _width + x) >= _cells.size() ||
+        _matchesAnyOf(_cells[(y + brick_height) * _width + x], 0, key));
     case liggande:
         return 
         _matchesAnyOf(_cells[y * _width + x], 0, key) && 
@@ -138,27 +144,29 @@ void Board::_setValue(int x, int y, const bricktype& bricktype, int value)
 
 std::vector<BoardCoordinate> Board::getCoordinates()
 {
-    
     std::vector<BoardCoordinate> output(_cells.size());
     
-    
     // Build an vector of all IDs that we haven't yet handled
-    std::vector<int> tmpIds(_bricks.size());
+    std::vector<int> tmpIds(0);
     for (int i = 0; i < _bricks.size(); i++)
     {
-        tmpIds[i] = _bricks.at(i).getId();
+        tmpIds.push_back(_bricks.at(i).getId());
     }
 
     //Iterate through the board
-    int x = 0;
+    int x = -1;
     int y = 0;
     for(int i=0; i < _cells.size(); i++)
     {
-        x++;
+        //x++;
         if (i != 0 && i % _width == 0)
         {
             y++;
             x = 0;
+        } 
+        else 
+        {
+            x++;
         }
 
         //Check if already prcessed, if so - skip
@@ -260,12 +268,14 @@ bool Board::_translateBrick(int id, transition transition, const bricktype& bric
     int y = 0;
     for(int i=0; i < _cells.size(); i++)
     {
-        x++;
         if (i != 0 && i % _width == 0)
         {
             y++;
             x = 0;
+        } else {
+            x++;
         }
+
         if(_cells[i]==id)
         {
             break;

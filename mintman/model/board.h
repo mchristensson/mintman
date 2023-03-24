@@ -64,6 +64,8 @@ private:
     int _height;
     std::vector<int> _cells;
     std::vector<Brick> _bricks;
+
+private:
     bool _canPlace(int x, int y, const bricktype& bricktype, int key);
     bool _translateBrick(int id, transition transition, const bricktype& bricktype);
     Brick* _findBrick(int id);
