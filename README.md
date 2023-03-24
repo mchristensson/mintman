@@ -22,6 +22,13 @@ Originally implemented for ABC80 by Anders Franzén <5258> (1985-07-05 01.47.21)
 > latar sig.
 >  ```
 
+Original board size should be: `{width: 4, height:5}`
+
+> Made in England by Kelrack Ltd. in the beginning of 80's. Originally called Mint Man, this toy with robot likeness is really a puzzle which you have to solve in order to get the mints sealed in a bag behind the teeth. Educational, funny, and very motivating! 
+> What's more interesting, the Mint Man has made it into an all-Finnish version called Minttu-Pekka (akin to Mint-Peter), with instructions & ingredient info embossed on the back. The puzzle measures 9 x 7 x 2 cm, and bears a copyright year 1982.
+
+Ref. [Moonbase Central](https://projectswordtoys.blogspot.com/2011/08/its-mint-man.html)
+
 ## About
 * Implemented in C++ as a learning project.
 * Not designed to mimic the ABC-80 implementation.

@@ -3,12 +3,21 @@
 #include "brick.h"
 #include"transition.h"
 
+struct BoardCoordinate
+{
+    int x, y, width, height;
+    int r, g, b;
+    BoardCoordinate() {}
+};
+
 class Board
 {
 
 public: 
     Board(int width, int height);
+    ~Board();
     void debug();
+    std::vector<BoardCoordinate> getCoordinates();
 
     bool place(const Brick& brick, int x, int y) 
     { 
@@ -38,6 +47,16 @@ public:
         std::string command;
         std::cin >> command;
         _handleConsoleInput(command);
+    }
+
+    int getWidth()
+    {
+        return _width;
+    }
+
+    int getHeight()
+    {
+        return _height;
     }
 
 private:

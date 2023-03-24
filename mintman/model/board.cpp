@@ -3,12 +3,18 @@
 #include <iostream>
 #include <string>
 #include <stdexcept> // innehåller undantagsklasser
-
+#include <algorithm> // Binary search
 
 Board::Board(int width, int height) :
-    _width(width), _height(height), _cells(_width * _height, 0), _bricks(20, Brick())
+    _width(width), _height(height), _cells(_width * _height, 0), _bricks(0, Brick())
 {
 };
+
+Board::~Board()
+{
+    _bricks.clear();
+    _cells.clear();
+}
 
 void Board::_handleConsoleInput(std::string ch)
 {
@@ -29,7 +35,7 @@ void Board::_handleConsoleInput(std::string ch)
             else if (cmd == "w")
                 transition = up;
             else {
-                std::cerr << "Ogilitig riktning";
+                std::cerr << "Ogilitig riktning" << std::endl;
                 return;
             }
             //std::cout << "\nYou pressed " << ch << "  with command " << cmd << " transition: " << transition  << " \n";
@@ -52,26 +58,26 @@ void Board::_handleConsoleInput(std::string ch)
 }
 
 bool Board::_canPlace(int x, int y, const bricktype& bricktype, int key) {
-    int dy = 0;
-    int dx = 0;
+    int brick_height = 0;
+    int brick_width = 0;
     switch (bricktype)
     {
     case staende:
-        dy = 1;
+        brick_height = 1;
         break;
     case liggande:
-        dx = 1;
+        brick_width = 1;
         break;
     case mintman:
-        dx = 1;
-        dy = 1;
+        brick_width = 1;
+        brick_height = 1;
         break;
     default:
         break;
     }
 
     //Out of bounds-check
-    if ( (x < 0 && (x+dx) >= _width) || (y < 0 && (y+dy) >= _height) )
+    if ( (x < 0 && (x+brick_width) >= _width) || (y < 0 && (y+brick_height) >= _height) )
     {
         return false;
     }
@@ -82,17 +88,17 @@ bool Board::_canPlace(int x, int y, const bricktype& bricktype, int key) {
     case staende:
         return 
         _matchesAnyOf(_cells[y * _width + x], 0, key) && 
-        _matchesAnyOf(_cells[(y + dy) * _width + x], 0, key);
+        _matchesAnyOf(_cells[(y + brick_height) * _width + x], 0, key);
     case liggande:
         return 
         _matchesAnyOf(_cells[y * _width + x], 0, key) && 
-        _matchesAnyOf(_cells[y * _width + x + dx], 0, key);
+        _matchesAnyOf(_cells[y * _width + x + brick_width], 0, key);
     case mintman:
         return 
         _matchesAnyOf(_cells[y * _width + x], 0, key) && 
-        _matchesAnyOf(_cells[(y + dy) * _width + x], 0, key) && 
-        _matchesAnyOf(_cells[y * _width + x + dx], 0, key) && 
-        _matchesAnyOf(_cells[(y + dy) * _width + x + dx], 0, key);
+        _matchesAnyOf(_cells[(y + brick_height) * _width + x], 0, key) && 
+        _matchesAnyOf(_cells[y * _width + x + brick_width], 0, key) && 
+        _matchesAnyOf(_cells[(y + brick_height) * _width + x + brick_width], 0, key);
     default:
         return _matchesAnyOf(_cells[y * _width + x], 0, key);
     }
@@ -128,6 +134,111 @@ void Board::_setValue(int x, int y, const bricktype& bricktype, int value)
         int dr = (y+r) * _width + x;
         std::fill_n(_cells.begin() + dr, brickWidth, value);
     }
+}
+
+std::vector<BoardCoordinate> Board::getCoordinates()
+{
+    
+    std::vector<BoardCoordinate> output(_cells.size());
+    
+    
+    // Build an vector of all IDs that we haven't yet handled
+    std::vector<int> tmpIds(_bricks.size());
+    for (int i = 0; i < _bricks.size(); i++)
+    {
+        tmpIds[i] = _bricks.at(i).getId();
+    }
+
+    //Iterate through the board
+    int x = 0;
+    int y = 0;
+    for(int i=0; i < _cells.size(); i++)
+    {
+        x++;
+        if (i != 0 && i % _width == 0)
+        {
+            y++;
+            x = 0;
+        }
+
+        //Check if already prcessed, if so - skip
+        bool skip = true;
+        auto tmpIdsIterator = tmpIds.begin(); 
+        while (tmpIdsIterator != tmpIds.end())
+        {
+            if (_cells[i] == 0) {
+                break;
+            } 
+            else if (*tmpIdsIterator == _cells[i])
+            {
+                tmpIdsIterator = tmpIds.erase(tmpIdsIterator);
+                skip = false; 
+                break;
+            }
+            tmpIdsIterator++;
+        }
+        if (skip)
+        {
+            continue;
+        }
+
+        auto b = _findBrick(_cells[i]);
+        if (!b) 
+        {
+            continue;
+        }
+
+        BoardCoordinate c;
+        switch (b->getBricktype())
+        {
+        case liggande:
+            c.width = 2;
+            c.height = 1;
+            
+            //Plastic yellow color
+            c.r = 210; 
+            c.g = 214;
+            c.b = 101;
+            
+            break;
+        case staende:
+            c.width = 1;
+            c.height = 2;
+            
+            //Mint green color
+            c.r = 92; 
+            c.g = 189;
+            c.b = 182;
+            
+            break;
+        case mintman:
+            c.width = 2;
+            c.height = 2;
+            
+            //Plastic red color
+            c.r = 247; 
+            c.g = 129;
+            c.b = 119;
+             
+            break;
+        case liten:
+            c.width = 1;
+            c.height = 1;
+            
+            //Plastic red color
+            c.r = 247; 
+            c.g = 129;
+            c.b = 119;
+            
+            break;
+        default:
+            continue;
+        }
+        c.x = x;
+        c.y = y;
+        output.push_back(c); 
+    }
+    return output;
 }
 
 Brick* Board::_findBrick(int id)
